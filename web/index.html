@@ -14,6 +14,7 @@
       --accent: #6366f1;
       --green: #22c55e;
       --blue: #3b82f6;
+      --orange: #f59e0b;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -61,7 +62,7 @@
     }
     .stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
       gap: 1rem;
     }
     .stat {
@@ -71,12 +72,15 @@
       border-radius: 8px;
     }
     .stat-value {
-      font-size: 1.75rem;
+      font-size: 1.5rem;
       font-weight: 700;
       color: var(--accent);
     }
+    .stat-value.green { color: var(--green); }
+    .stat-value.blue { color: var(--blue); }
+    .stat-value.orange { color: var(--orange); }
     .stat-label {
-      font-size: 0.875rem;
+      font-size: 0.75rem;
       color: var(--muted);
     }
     .address {
@@ -121,6 +125,7 @@
     }
     .event.donation::before { background: var(--green); }
     .event.allocation::before { background: var(--blue); }
+    .event.proof::before { background: var(--orange); }
     .event-time {
       font-size: 0.75rem;
       color: var(--muted);
@@ -147,6 +152,15 @@
     }
     .tag.donation { background: var(--green); }
     .tag.allocation { background: var(--blue); }
+    .tag.proof { background: var(--orange); }
+    .section-divider {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin: 2rem 0 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
     footer {
       text-align: center;
       margin-top: 2rem;
@@ -156,6 +170,7 @@
     a { color: var(--accent); }
     .loading { color: var(--muted); font-style: italic; }
     .error { color: #ef4444; }
+    .empty { color: var(--muted); font-style: italic; text-align: center; padding: 1rem; }
   </style>
 </head>
 <body>
@@ -173,7 +188,7 @@
   </div>
 
   <div class="card">
-    <h2>Fund Status <span id="status-indicator" class="loading">(loading...)</span></h2>
+    <h2>On-Chain Status <span id="status-indicator" class="loading">(loading...)</span></h2>
     <div class="stats">
       <div class="stat">
         <div class="stat-value" id="balance-sol">—</div>
@@ -187,7 +202,38 @@
   </div>
 
   <div class="card">
-    <h2>Recent Transactions</h2>
+    <h2>Fund Tracker <span id="tracker-indicator" class="loading">(loading...)</span></h2>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value green" id="total-received">—</div>
+        <div class="stat-label">Total Received</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value blue" id="total-allocated">—</div>
+        <div class="stat-label">Allocated</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="total-remaining">—</div>
+        <div class="stat-label">Remaining</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value orange" id="proof-count">—</div>
+        <div class="stat-label">Proofs</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Audit Trail</h2>
+    <div class="timeline" id="audit-trail">
+      <p class="loading">Loading fund data...</p>
+    </div>
+  </div>
+
+  <div class="section-divider">Raw Chain Data</div>
+
+  <div class="card">
+    <h2>Recent On-Chain Transactions</h2>
     <div class="timeline" id="timeline">
       <p class="loading">Loading from Solana...</p>
     </div>
@@ -213,6 +259,7 @@
   <script>
     const FUND_ADDRESS = '5D4hWLFW8m76gYEfHSETR86vbxeGegRvg4b2tn45XxXu';
     const RPC_URL = 'https://api.devnet.solana.com';
+    const API_URL = '/api/fund';
 
     function copyAddress() {
       const addr = document.getElementById('fund-address').textContent;
@@ -250,7 +297,7 @@
         document.getElementById('tx-count').textContent = sigs.length;
         
         if (sigs.length === 0) {
-          timeline.innerHTML = '<p class="loading">No transactions yet</p>';
+          timeline.innerHTML = '<p class="empty">No transactions yet</p>';
           return;
         }
 
@@ -285,14 +332,116 @@
       }
     }
 
+    async function loadFundTracker() {
+      const auditTrail = document.getElementById('audit-trail');
+      const trackerIndicator = document.getElementById('tracker-indicator');
+      
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        
+        // Update summary stats
+        const sol = data.summary?.sol || { received: 0, allocated: 0, remaining: 0 };
+        document.getElementById('total-received').textContent = sol.received.toFixed(2) + ' SOL';
+        document.getElementById('total-allocated').textContent = sol.allocated.toFixed(2) + ' SOL';
+        document.getElementById('total-remaining').textContent = sol.remaining.toFixed(2) + ' SOL';
+        document.getElementById('proof-count').textContent = data.summary?.proofs || 0;
+        
+        // Build audit trail
+        const entries = [];
+        
+        for (const d of data.donations || []) {
+          entries.push({ type: 'donation', data: d, timestamp: new Date(d.timestamp) });
+        }
+        for (const a of data.allocations || []) {
+          entries.push({ type: 'allocation', data: a, timestamp: new Date(a.timestamp) });
+        }
+        for (const p of data.proofs || []) {
+          entries.push({ type: 'proof', data: p, timestamp: new Date(p.timestamp) });
+        }
+        
+        entries.sort((a, b) => b.timestamp - a.timestamp); // newest first
+        
+        if (entries.length === 0) {
+          auditTrail.innerHTML = '<p class="empty">No tracked donations yet. Send SOL to the fund address to get started!</p>';
+          trackerIndicator.textContent = `(${data.source || 'loaded'})`;
+          trackerIndicator.className = '';
+          return;
+        }
+        
+        let html = '';
+        for (const entry of entries) {
+          const time = entry.timestamp.toLocaleString('en-US', { 
+            month: 'short', day: 'numeric', year: 'numeric', 
+            hour: '2-digit', minute: '2-digit'
+          });
+          
+          if (entry.type === 'donation') {
+            const d = entry.data;
+            const shortTx = d.txHash.slice(0, 8) + '...' + d.txHash.slice(-8);
+            const explorerUrl = `https://explorer.solana.com/tx/${d.txHash}?cluster=devnet`;
+            html += `
+              <div class="event donation">
+                <div class="event-time">${time}</div>
+                <div class="event-title"><span class="tag donation">DONATION</span> ${d.amount} ${d.currency}</div>
+                <div class="event-detail">From: ${d.from.slice(0, 8)}...${d.from.slice(-4)}</div>
+                ${d.memo ? `<div class="event-detail">Memo: ${d.memo}</div>` : ''}
+                <div class="event-link"><a href="${explorerUrl}" target="_blank">${shortTx} →</a></div>
+              </div>
+            `;
+          }
+          
+          if (entry.type === 'allocation') {
+            const a = entry.data;
+            const shortTx = a.txHash.slice(0, 8) + '...' + a.txHash.slice(-8);
+            const explorerUrl = `https://explorer.solana.com/tx/${a.txHash}?cluster=devnet`;
+            html += `
+              <div class="event allocation">
+                <div class="event-time">${time}</div>
+                <div class="event-title"><span class="tag allocation">ALLOCATION</span> ${a.amount} ${a.currency}</div>
+                <div class="event-detail">To: ${a.recipientName}</div>
+                <div class="event-detail">Purpose: ${a.purpose}</div>
+                <div class="event-link"><a href="${explorerUrl}" target="_blank">${shortTx} →</a></div>
+              </div>
+            `;
+          }
+          
+          if (entry.type === 'proof') {
+            const p = entry.data;
+            html += `
+              <div class="event proof">
+                <div class="event-time">${time}</div>
+                <div class="event-title"><span class="tag proof">PROOF</span> ${p.verified ? '✅ Verified' : '⏳ Pending'}</div>
+                <div class="event-detail">${p.description}</div>
+                ${p.evidenceLinks?.length ? `<div class="event-link">${p.evidenceLinks.map(l => `<a href="${l}" target="_blank">Evidence →</a>`).join(' ')}</div>` : ''}
+              </div>
+            `;
+          }
+        }
+        
+        auditTrail.innerHTML = html;
+        trackerIndicator.textContent = `(${data.source || 'loaded'})`;
+        trackerIndicator.className = '';
+        
+      } catch (e) {
+        auditTrail.innerHTML = `<p class="error">Failed to load fund data: ${e.message}</p>`;
+        trackerIndicator.textContent = '(error)';
+        trackerIndicator.className = 'error';
+        console.error('Fund tracker error:', e);
+      }
+    }
+
     // Load data on page load
     loadBalance();
     loadTransactions();
+    loadFundTracker();
 
     // Refresh every 30 seconds
     setInterval(() => {
       loadBalance();
       loadTransactions();
+      loadFundTracker();
     }, 30000);
   </script>
 </body>
