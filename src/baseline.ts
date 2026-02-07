@@ -269,3 +269,11 @@ export function getAllSessions(): BaselineSession[] {
 export function getSession(sessionId: string): BaselineSession | undefined {
   return sessions.get(sessionId);
 }
+
+/**
+ * Reset all state (for testing)
+ */
+export function resetBaseline(): void {
+  sessions.clear();
+  votes.clear();
+}
