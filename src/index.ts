@@ -7,18 +7,24 @@
 
 import { FundTracker } from './fund-tracker';
 import { WalletManager } from './wallet';
+import { ChainVerifier } from './chain-verifier';
 
 export { FundTracker } from './fund-tracker';
 export { WalletManager } from './wallet';
+export { ChainVerifier } from './chain-verifier';
 export * from './types';
 
 // Main class that combines tracking and wallet operations
 export class TransparentFund {
   public tracker: FundTracker;
   public wallet: WalletManager | null = null;
+  public verifier: ChainVerifier;
+  private network: 'devnet' | 'mainnet';
 
-  constructor(dataPath?: string) {
+  constructor(dataPath?: string, network: 'devnet' | 'mainnet' = 'devnet') {
     this.tracker = new FundTracker(dataPath);
+    this.verifier = new ChainVerifier(network);
+    this.network = network;
   }
 
   // Initialize with wallet
@@ -39,24 +45,32 @@ export class TransparentFund {
     return this.wallet.getBalances();
   }
 
-  // Process an incoming donation
+  // Process an incoming donation with on-chain verification
   async recordIncomingDonation(
     txHash: string,
-    from: string,
-    amount: number,
-    currency: 'SOL' | 'USDC',
+    expectedFrom?: string,
+    expectedAmount?: number,
+    currency: 'SOL' | 'USDC' = 'SOL',
     memo?: string
   ) {
+    // Verify on-chain first
+    const verified = await this.verifier.verifyTransaction(txHash);
+    if (!verified) {
+      throw new Error(`Transaction ${txHash} not found or failed on-chain`);
+    }
+
+    // Use on-chain data as source of truth
     const donation = this.tracker.recordDonation({
       txHash,
-      from,
-      amount,
-      currency,
-      timestamp: new Date(),
+      from: verified.from,
+      amount: verified.amount,
+      currency: verified.currency,
+      timestamp: verified.timestamp,
       memo
     });
-    console.log(`Recorded donation ${donation.id}: ${amount} ${currency} from ${from}`);
-    return donation;
+    
+    console.log(`Verified & recorded donation ${donation.id}: ${verified.amount} ${verified.currency} from ${verified.from}`);
+    return { donation, verified };
   }
 
   // Allocate funds to a recipient
