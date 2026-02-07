@@ -53,7 +53,7 @@ export class WalletManager {
   }
 
   // Check balances
-  async getBalances(): Promise<Balance> {
+  async getBalances(network: 'mainnet' | 'devnet' = 'devnet'): Promise<Balance> {
     const response = await fetch(
       `${this.config.baseUrl}/wallets/${this.config.username}/balances`,
       {
@@ -69,12 +69,24 @@ export class WalletManager {
 
     const data = await response.json();
     
-    // Parse balances from response
-    // AgentWallet returns balances in smallest units
-    return {
-      sol: (data.solana?.sol || 0) / 1e9,
-      usdc: (data.solana?.usdc || 0) / 1e6
-    };
+    // Parse balances from solana wallet balances array
+    const chainName = network === 'devnet' ? 'solana-devnet' : 'solana';
+    const solanaBalances = data.solana?.balances || [];
+    
+    let sol = 0;
+    let usdc = 0;
+    
+    for (const bal of solanaBalances) {
+      if (bal.chain === chainName) {
+        if (bal.asset === 'sol') {
+          sol = parseInt(bal.rawValue || '0') / 1e9;
+        } else if (bal.asset === 'usdc') {
+          usdc = parseInt(bal.rawValue || '0') / 1e6;
+        }
+      }
+    }
+    
+    return { sol, usdc };
   }
 
   // Transfer SOL to a recipient
