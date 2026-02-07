@@ -7,7 +7,7 @@ export interface Donation {
   id: string;
   txHash: string;
   from: string; // donor wallet address
-  amount: number; // in lamports or smallest unit
+  amount: number; // in SOL or USDC (human-readable, not lamports)
   currency: 'SOL' | 'USDC';
   timestamp: Date;
   memo?: string; // optional donor message

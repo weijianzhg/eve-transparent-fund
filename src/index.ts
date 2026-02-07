@@ -137,14 +137,14 @@ export class TransparentFund {
     
     return {
       sol: {
-        received: sol.totalReceived / 1e9,
-        allocated: sol.totalAllocated / 1e9,
-        remaining: sol.totalRemaining / 1e9
+        received: sol.totalReceived,
+        allocated: sol.totalAllocated,
+        remaining: sol.totalRemaining
       },
       usdc: {
-        received: usdc.totalReceived / 1e6,
-        allocated: usdc.totalAllocated / 1e6,
-        remaining: usdc.totalRemaining / 1e6
+        received: usdc.totalReceived,
+        allocated: usdc.totalAllocated,
+        remaining: usdc.totalRemaining
       },
       donations: sol.donationCount,
       allocations: sol.allocationCount,
