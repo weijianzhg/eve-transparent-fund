@@ -17,7 +17,7 @@ interface TransferResult {
   error?: string;
 }
 
-interface Balance {
+export interface Balance {
   sol: number;
   usdc: number;
 }

@@ -6,7 +6,7 @@
 
 import { Connection, PublicKey, ParsedTransactionWithMeta } from '@solana/web3.js';
 
-interface VerifiedTransaction {
+export interface VerifiedTransaction {
   txHash: string;
   from: string;
   to: string;

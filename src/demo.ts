@@ -1,5 +1,8 @@
 /**
  * Demo script showing the Transparent Fund flow
+ * 
+ * This demo uses the tracker directly for simulation.
+ * For real usage, use TransparentFund.recordIncomingDonation() which verifies on-chain.
  */
 
 import { TransparentFund } from './index';
@@ -17,15 +20,16 @@ async function demo() {
   console.log(`   Balance: ${balance.sol} SOL, ${balance.usdc} USDC`);
   console.log(`   Address: ${fund.getAddress()}`);
   
-  // Simulate receiving a donation (in real use, this would come from monitoring the wallet)
-  console.log('\n📥 Simulating donation received...');
-  const donation = await fund.recordIncomingDonation(
-    'simulated_tx_hash_001',
-    'DonorWallet123abc',
-    50000000, // 0.05 SOL in lamports
-    'SOL',
-    'For education programs'
-  );
+  // Simulate receiving a donation (using tracker directly for demo)
+  console.log('\n📥 Simulating donation (direct tracker, no on-chain verification)...');
+  const donation = fund.tracker.recordDonation({
+    txHash: 'demo_tx_hash_001',
+    from: 'DonorWallet123abc',
+    amount: 0.05, // SOL
+    currency: 'SOL',
+    timestamp: new Date(),
+    memo: 'For education programs'
+  });
   console.log(`   Recorded: ${donation.id}`);
   
   // Show fund summary
@@ -34,13 +38,13 @@ async function demo() {
   console.log(`   SOL: ${summary.sol.received} received, ${summary.sol.allocated} allocated`);
   console.log(`   Donations: ${summary.donations}, Allocations: ${summary.allocations}`);
   
-  // Simulate an allocation (skip actual transfer for demo)
+  // Simulate an allocation
   console.log('\n📤 Recording allocation...');
   const allocation = fund.tracker.recordAllocation({
-    txHash: 'simulated_tx_hash_002',
+    txHash: 'demo_tx_hash_002',
     to: 'RecipientWallet456def',
     recipientName: 'Local School Fund',
-    amount: 25000000, // 0.025 SOL
+    amount: 0.025, // SOL
     currency: 'SOL',
     purpose: 'Purchase educational materials',
     timestamp: new Date(),

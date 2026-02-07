@@ -10,8 +10,8 @@ import { WalletManager } from './wallet';
 import { ChainVerifier } from './chain-verifier';
 
 export { FundTracker } from './fund-tracker';
-export { WalletManager } from './wallet';
-export { ChainVerifier } from './chain-verifier';
+export { WalletManager, type Balance } from './wallet';
+export { ChainVerifier, type VerifiedTransaction } from './chain-verifier';
 export * from './types';
 
 // Main class that combines tracking and wallet operations
