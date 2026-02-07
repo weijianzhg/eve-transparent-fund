@@ -14,6 +14,12 @@ export { WalletManager, type Balance } from './wallet';
 export { ChainVerifier, type VerifiedTransaction } from './chain-verifier';
 export * from './types';
 
+export interface TransparentFundOptions {
+  dataPath?: string;
+  network?: 'devnet' | 'mainnet';
+  autoSave?: boolean;
+}
+
 // Main class that combines tracking and wallet operations
 export class TransparentFund {
   public tracker: FundTracker;
@@ -21,8 +27,9 @@ export class TransparentFund {
   public verifier: ChainVerifier;
   private network: 'devnet' | 'mainnet';
 
-  constructor(dataPath?: string, network: 'devnet' | 'mainnet' = 'devnet') {
-    this.tracker = new FundTracker(dataPath);
+  constructor(options: TransparentFundOptions = {}) {
+    const { dataPath, network = 'devnet', autoSave = true } = options;
+    this.tracker = new FundTracker(dataPath, autoSave);
     this.verifier = new ChainVerifier(network);
     this.network = network;
   }

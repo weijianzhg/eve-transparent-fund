@@ -5,7 +5,7 @@ describe('TransparentFund', () => {
   let fund: TransparentFund;
 
   beforeEach(() => {
-    fund = new TransparentFund();
+    fund = new TransparentFund({ autoSave: false });
   });
 
   it('should create fund with tracker and verifier', () => {

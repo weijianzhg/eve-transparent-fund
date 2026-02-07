@@ -5,6 +5,8 @@
  * In production, this would be backed by on-chain data.
  */
 
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { dirname } from 'path';
 import { 
   Donation, 
   Allocation, 
@@ -13,14 +15,75 @@ import {
   AuditEntry 
 } from './types';
 
+interface PersistedData {
+  donations: Donation[];
+  allocations: Allocation[];
+  proofs: ProofOfImpact[];
+  savedAt: string;
+}
+
 export class FundTracker {
   private donations: Map<string, Donation> = new Map();
   private allocations: Map<string, Allocation> = new Map();
   private proofs: Map<string, ProofOfImpact> = new Map();
   private dataPath: string;
+  private autoSave: boolean;
 
-  constructor(dataPath: string = './data/fund-data.json') {
+  constructor(dataPath: string = './data/fund-data.json', autoSave: boolean = true) {
     this.dataPath = dataPath;
+    this.autoSave = autoSave;
+    this.load();
+  }
+
+  // Load data from disk
+  private load(): void {
+    if (!existsSync(this.dataPath)) return;
+    
+    try {
+      const raw = readFileSync(this.dataPath, 'utf-8');
+      const data: PersistedData = JSON.parse(raw);
+      
+      // Convert dates back from strings
+      for (const d of data.donations || []) {
+        d.timestamp = new Date(d.timestamp);
+        this.donations.set(d.id, d);
+      }
+      for (const a of data.allocations || []) {
+        a.timestamp = new Date(a.timestamp);
+        this.allocations.set(a.id, a);
+      }
+      for (const p of data.proofs || []) {
+        p.timestamp = new Date(p.timestamp);
+        this.proofs.set(p.id, p);
+      }
+    } catch (e) {
+      console.error(`Failed to load fund data from ${this.dataPath}:`, e);
+    }
+  }
+
+  // Save data to disk
+  save(): void {
+    try {
+      const dir = dirname(this.dataPath);
+      if (!existsSync(dir)) {
+        mkdirSync(dir, { recursive: true });
+      }
+      
+      const data: PersistedData = {
+        donations: Array.from(this.donations.values()),
+        allocations: Array.from(this.allocations.values()),
+        proofs: Array.from(this.proofs.values()),
+        savedAt: new Date().toISOString()
+      };
+      
+      writeFileSync(this.dataPath, JSON.stringify(data, null, 2));
+    } catch (e) {
+      console.error(`Failed to save fund data to ${this.dataPath}:`, e);
+    }
+  }
+
+  private maybeAutoSave(): void {
+    if (this.autoSave) this.save();
   }
 
   // Record a new donation
@@ -28,6 +91,7 @@ export class FundTracker {
     const id = `don_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const fullDonation: Donation = { ...donation, id };
     this.donations.set(id, fullDonation);
+    this.maybeAutoSave();
     return fullDonation;
   }
 
@@ -36,6 +100,7 @@ export class FundTracker {
     const id = `alloc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const fullAllocation: Allocation = { ...allocation, id };
     this.allocations.set(id, fullAllocation);
+    this.maybeAutoSave();
     return fullAllocation;
   }
 
@@ -44,6 +109,7 @@ export class FundTracker {
     const id = `proof_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const fullProof: ProofOfImpact = { ...proof, id, verified: false };
     this.proofs.set(id, fullProof);
+    this.maybeAutoSave();
     return fullProof;
   }
 
@@ -52,6 +118,7 @@ export class FundTracker {
     const proof = this.proofs.get(proofId);
     if (proof) {
       proof.verified = true;
+      this.maybeAutoSave();
       return true;
     }
     return false;
