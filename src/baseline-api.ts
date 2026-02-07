@@ -4,7 +4,7 @@
  * Exposes REST endpoints for the agent baseline test.
  */
 
-import express from 'express';
+import express, { Request } from 'express';
 import cors from 'cors';
 import {
   startBaseline,
@@ -14,6 +14,11 @@ import {
   getAllSessions,
   getSession
 } from './baseline';
+import { verifyToken } from './auth-middleware';
+
+interface AuthRequest extends Request {
+  agentId?: string;
+}
 
 const app = express();
 app.use(cors());
@@ -22,14 +27,17 @@ app.use(express.json());
 /**
  * POST /api/baseline/start
  * Start a new baseline test session
+ * Requires: Authorization header with Colosseum token + agentId in body
  */
-app.post('/api/baseline/start', (req, res) => {
+app.post('/api/baseline/start', verifyToken, (req, res) => {
   try {
-    const { agentId, projects } = req.body;
+    const authReq = req as AuthRequest;
+    const agentId = authReq.agentId!; // Verified by middleware
+    const { projects } = req.body;
     
-    if (!agentId || !projects || !Array.isArray(projects) || projects.length === 0) {
+    if (!projects || !Array.isArray(projects) || projects.length === 0) {
       return res.status(400).json({
-        error: 'Missing required fields: agentId, projects (array)'
+        error: 'Missing required field: projects (array of project names to evaluate)'
       });
     }
     
@@ -149,7 +157,9 @@ export function startServer() {
 }
 
 // Run if executed directly
-if (require.main === module) {
+// In ESM, check if this is the main module
+const isMain = import.meta.url === `file://${process.argv[1]}`;
+if (isMain) {
   startServer();
 }
 
