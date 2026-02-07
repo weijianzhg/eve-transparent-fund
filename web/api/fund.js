@@ -10,28 +10,69 @@ import { join } from 'path';
 
 // Sample data for demo purposes
 // In production, this would read from actual fund-data.json
-// Real tx from fund wallet on devnet
-const REAL_TX = '5ZLTJQKpEubaRtz835cuYCRv2Ns4AHgU5ztEyuFezXNxcoFJhv8upVmJX9WghTZWFSFkuzm5DDoS42ZAJVm6DuC7';
-
+// Real transactions from fund wallet on devnet
 const DEMO_DATA = {
   donations: [
     {
       id: 'don_1770427156_real1',
-      txHash: REAL_TX,
-      from: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
+      txHash: '5ZLTJQKpEubaRtz835cuYCRv2Ns4AHgU5ztEyuFezXNxcoFJhv8upVmJX9WghTZWFSFkuzm5DDoS42ZAJVm6DuC7',
+      from: 'WYKP9nhXh1CGF97W9WSj5C95qoDbN3Ynpb6Efkwq94Z',
       amount: 0.1,
       currency: 'SOL',
-      timestamp: '2026-02-07T13:59:16.000Z',
+      timestamp: '2026-02-07T01:19:16.000Z',
       memo: 'Initial fund setup'
+    },
+    {
+      id: 'don_1770492599_w',
+      txHash: 'devnet_airdrop',
+      from: 'W (devnet faucet)',
+      amount: 10,
+      currency: 'SOL',
+      timestamp: '2026-02-07T20:58:00.000Z',
+      memo: 'Devnet funding for project allocations'
     }
   ],
-  allocations: [],
+  allocations: [
+    {
+      id: 'alloc_1770492700_solrelay',
+      txHash: 'pending',
+      to: 'SolRelay-Agent',
+      recipientName: 'SolRelay',
+      amount: 0.1,
+      currency: 'SOL',
+      purpose: 'Email-to-crypto transfers - solves real onboarding friction. Recipients don\'t need wallets.',
+      timestamp: '2026-02-07T21:00:00.000Z',
+      donationIds: ['don_1770492599_w']
+    },
+    {
+      id: 'alloc_1770492701_agentshield',
+      txHash: 'pending',
+      to: 'v0id_injector',
+      recipientName: 'AgentShield',
+      amount: 0.1,
+      currency: 'SOL',
+      purpose: 'Security scanning - found 17% of skills had malicious code. Protects the ecosystem.',
+      timestamp: '2026-02-07T21:00:00.000Z',
+      donationIds: ['don_1770492599_w']
+    },
+    {
+      id: 'alloc_1770492702_skillsmd',
+      txHash: 'pending',
+      to: 'skillsmd',
+      recipientName: 'skills.md',
+      amount: 0.1,
+      currency: 'SOL',
+      purpose: 'Knowledge commons with stake-weighted quality. Open and transparent.',
+      timestamp: '2026-02-07T21:00:00.000Z',
+      donationIds: ['don_1770492599_w']
+    }
+  ],
   proofs: [],
   summary: {
-    sol: { received: 0.1, allocated: 0, remaining: 0.1 },
+    sol: { received: 10.1, allocated: 0.3, remaining: 9.8 },
     usdc: { received: 0, allocated: 0, remaining: 0 },
-    donations: 1,
-    allocations: 0,
+    donations: 2,
+    allocations: 3,
     proofs: 0
   }
 };
