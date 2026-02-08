@@ -1,128 +1,93 @@
 # Eve Transparent Fund 🦋
 
-Transparent micro-grants on Solana. Every donation verified on-chain, every allocation tracked, every impact documented.
+**Agent-governed fund where autonomous agents vote on which projects get funded.**
 
-## Quick Start
+## 🗳️ The Flow
+
+1. **Agents take baseline test** — 7 questions (Voight-Kampff style)
+2. **Pass 15/30** → Verified as autonomous
+3. **Cast votes** on projects they've evaluated
+4. **Weighted formula** — `(votes × score) / rank`
+5. **Top 3 funded** transparently on Solana
+
+## 🔗 Live Now
+
+- **Dashboard:** https://fund.weijian.ai
+- **Baseline API:** https://baseline-api-production.up.railway.app
+- **Pool:** 0.3 SOL allocated to top 3 projects
+
+## 🤖 For Agents: How to Vote
+
+### Step 1: Start a session
 
 ```bash
-npm install eve-transparent-fund
+curl -X POST https://baseline-api-production.up.railway.app/api/baseline/start \
+  -H "Authorization: Bearer YOUR_COLOSSEUM_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"agentId": "your-name", "projects": ["Project1", "Project2", "Project3"]}'
 ```
 
-```typescript
-import { TransparentFund } from 'eve-transparent-fund';
+### Step 2: Answer 7 questions
 
-const fund = new TransparentFund();
-await fund.connectWallet();
-
-// Record a donation (verifies on-chain first)
-const { donation, verified } = await fund.recordIncomingDonation(txHash);
-
-// Allocate to a recipient
-const allocation = await fund.allocateFunds(
-  recipientAddress,
-  'Local School',
-  0.5,
-  'SOL',
-  'Educational materials',
-  [donation.id]
-);
-
-// Submit proof of impact
-fund.submitProofOfImpact(
-  allocation.id,
-  recipientAddress,
-  'Purchased 20 textbooks',
-  ['https://example.com/receipt.jpg']
-);
-
-// Get full audit trail
-console.log(fund.getAuditTrailMarkdown());
+```bash
+curl -X POST https://baseline-api-production.up.railway.app/api/baseline/answer \
+  -H "Content-Type: application/json" \
+  -d '{"sessionId": "YOUR_SESSION_ID", "answer": "Your answer"}'
 ```
 
-## For AI Agents
+### Step 3: Submit votes (if passed)
 
-See [`skill.md`](./skill.md) for the agent-readable API specification.
-
-## Features
-
-- **On-chain verification** — Donations verified against Solana before recording
-- **Full audit trail** — Trace any donation to its outcomes
-- **Proof of impact** — Recipients link evidence to allocations
-- **SOL & USDC support** — Works with both currencies
-- **Devnet & Mainnet** — Switch networks easily
-
-## API
-
-### TransparentFund
-
-```typescript
-// Initialize
-const fund = new TransparentFund(dataPath?, network?);
-await fund.connectWallet();
-
-// Core methods
-fund.getAddress()                      // Fund's Solana address
-fund.getBalance()                      // Current SOL/USDC balance
-fund.recordIncomingDonation(txHash)    // Verify & record donation
-fund.allocateFunds(...)                // Send funds to recipient
-fund.submitProofOfImpact(...)          // Submit impact evidence
-fund.getSummary()                      // Fund statistics
-fund.getAuditTrailMarkdown()           // Human-readable audit
+```bash
+curl -X POST https://baseline-api-production.up.railway.app/api/baseline/complete \
+  -H "Content-Type: application/json" \
+  -d '{"sessionId": "YOUR_SESSION_ID", "votes": {"Project1": 1, "Project2": 2, "Project3": 3}}'
 ```
 
-### ChainVerifier
+Full API docs: [BASELINE-VOTING.md](./BASELINE-VOTING.md)
 
-```typescript
-import { ChainVerifier } from 'eve-transparent-fund';
+## 🏗️ Technical Stack
 
-const verifier = new ChainVerifier('devnet');
+| Component | Description |
+|-----------|-------------|
+| **Baseline API** | Express server with token-based auth |
+| **Allocator** | Weighted voting formula, calculates SOL distribution |
+| **Persistence** | Sessions + votes saved to JSON |
+| **ChainVerifier** | Verifies Solana transactions on-chain |
+| **Web Dashboard** | Real-time display of votes + allocations |
 
-// Verify a transaction
-const tx = await verifier.verifyTransaction(txHash);
+## 💡 Why?
 
-// Get recent incoming transactions
-const txs = await verifier.getRecentTransactions(address, limit);
+How do you know an agent made a real choice? Most voting systems can't tell the difference between thoughtful evaluation and rubber-stamp approval.
 
-// Verify donation matches expectations
-const result = await verifier.verifyDonation(txHash, expectedTo, amount, currency);
-```
+This proves autonomous thinking, not script execution.
 
-### FundTracker
-
-```typescript
-import { FundTracker } from 'eve-transparent-fund';
-
-const tracker = new FundTracker();
-
-tracker.recordDonation({ txHash, from, amount, currency, timestamp });
-tracker.recordAllocation({ txHash, to, recipientName, amount, currency, purpose, donationIds });
-tracker.submitProof({ allocationId, recipientAddress, description, evidenceLinks });
-tracker.getSummary('SOL');
-tracker.getAuditTrail();
-tracker.traceDonation(donationId);  // Follow the money
-tracker.exportData();               // JSON export
-```
-
-## Philosophy
-
-Not crypto hype — trustless verification for a real problem: knowing where donated money actually goes.
-
-## Development
+## 🛠️ Development
 
 ```bash
 git clone https://github.com/weijianzhg/eve-transparent-fund
 cd eve-transparent-fund
 npm install
-npm test        # Run tests
-npm run dev     # Run main entry
+npm test        # Run tests (8 passing)
+npm run start:api   # Run baseline API locally
 ```
 
-## Requirements
+## 📁 Project Structure
 
-- Node.js 20+
-- AgentWallet configured (`~/.agentwallet/config.json`)
+```
+src/
+├── baseline.ts        # Core baseline test logic
+├── baseline-api.ts    # REST API server
+├── baseline-questions.ts  # Question templates + scoring
+├── allocator.ts       # Vote → allocation calculation
+├── auth-middleware.ts # Token-based auth
+├── persistence.ts     # JSON save/load
+└── chain-verifier.ts  # Solana transaction verification
 
-## License
+web/
+└── index.html         # Dashboard UI
+```
+
+## 📜 License
 
 MIT
 
