@@ -4,6 +4,13 @@
 
 import { getVoteResults } from './baseline';
 
+interface VoteResult {
+  projectId: string;
+  voteCount: number;
+  avgScore: number;
+  avgRank: number;
+}
+
 export interface AllocationResult {
   projectId: string;
   allocation: number; // SOL amount
@@ -22,14 +29,16 @@ export interface AllocationResult {
  *    (more votes, higher scores, better ranks = more weight)
  * 3. Each project gets: (weight / totalWeight) * poolAmount
  * 
+ * @param voteResults - Vote results from baseline test
  * @param poolAmount - Total SOL available for allocation
- * @param minVotes - Minimum votes required to be considered (default: 1)
+ * @param options - Optional filters (minVotes, topN)
  */
 export function calculateAllocations(
+  voteResults: VoteResult[],
   poolAmount: number,
-  minVotes: number = 1
+  options: { minVotes?: number; topN?: number } = {}
 ): AllocationResult[] {
-  const voteResults = getVoteResults();
+  const { minVotes = 1, topN } = options;
   
   // Filter out projects with insufficient votes
   const eligible = voteResults.filter(r => r.voteCount >= minVotes);
@@ -65,17 +74,25 @@ export function calculateAllocations(
   });
   
   // Sort by allocation (highest first)
-  return allocations.sort((a, b) => b.allocation - a.allocation);
+  allocations.sort((a, b) => b.allocation - a.allocation);
+  
+  // Apply topN filter if specified
+  if (topN && topN < allocations.length) {
+    return allocations.slice(0, topN);
+  }
+  
+  return allocations;
 }
 
 /**
  * Get allocation summary as human-readable text
  */
 export function getAllocationSummary(
+  voteResults: VoteResult[],
   poolAmount: number,
-  minVotes: number = 1
+  options?: { minVotes?: number; topN?: number }
 ): string {
-  const allocations = calculateAllocations(poolAmount, minVotes);
+  const allocations = calculateAllocations(voteResults, poolAmount, options);
   
   if (allocations.length === 0) {
     return 'No projects meet the minimum vote threshold.';
