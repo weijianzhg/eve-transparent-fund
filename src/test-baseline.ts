@@ -9,7 +9,15 @@ async function testBaseline() {
   console.log('Taking the baseline test as "eve"...\n');
   
   // Start session
-  const { sessionId, question: q1 } = startBaseline('eve', ['solrelay', 'agentshield', 'skillsmd']);
+  const startResult = startBaseline('eve', ['solrelay', 'agentshield', 'skillsmd']);
+  
+  if ('error' in startResult) {
+    console.log(`❌ Error: ${startResult.error}`);
+    console.log(`Attempts used: ${startResult.attemptsUsed}/${startResult.maxAttempts}`);
+    return;
+  }
+  
+  const { sessionId, question: q1 } = startResult;
   console.log(`Session started: ${sessionId}`);
   console.log(`\nQ1: ${q1}`);
   
