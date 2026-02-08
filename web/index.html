@@ -281,6 +281,28 @@
     <div class="last-updated">Last updated: <span id="last-updated">—</span></div>
   </div>
 
+  <!-- Fund Allocations -->
+  <div class="card">
+    <h2>Fund Allocations <span id="allocations-indicator" class="loading">(loading...)</span></h2>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value green" id="total-received">—</div>
+        <div class="stat-label">Total Received</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value orange" id="total-allocated">—</div>
+        <div class="stat-label">Allocated</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="total-remaining">—</div>
+        <div class="stat-label">Remaining</div>
+      </div>
+    </div>
+    <div style="margin-top: 1.5rem;" id="allocations-list">
+      <p class="loading">Loading allocations...</p>
+    </div>
+  </div>
+
   <div class="section-divider">Fund Details</div>
 
   <!-- Fund Address -->
@@ -431,14 +453,73 @@
       }
     }
 
+    async function loadAllocations() {
+      const allocationsList = document.getElementById('allocations-list');
+      const allocationsIndicator = document.getElementById('allocations-indicator');
+      
+      try {
+        const res = await fetch('/api/fund');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        
+        // Update summary
+        const sol = data.summary?.sol || { received: 0, allocated: 0, remaining: 0 };
+        document.getElementById('total-received').textContent = sol.received.toFixed(2) + ' SOL';
+        document.getElementById('total-allocated').textContent = sol.allocated.toFixed(2) + ' SOL';
+        document.getElementById('total-remaining').textContent = sol.remaining.toFixed(2) + ' SOL';
+        
+        // Build allocations list
+        if (!data.allocations || data.allocations.length === 0) {
+          allocationsList.innerHTML = '<p class="empty">No allocations yet</p>';
+          allocationsIndicator.textContent = '(loaded)';
+          allocationsIndicator.className = '';
+          return;
+        }
+        
+        let html = '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
+        for (const alloc of data.allocations) {
+          const time = new Date(alloc.timestamp).toLocaleString();
+          const shortTx = alloc.txHash === 'pending' ? 'Pending' : alloc.txHash.slice(0, 16) + '...';
+          const explorerUrl = alloc.txHash !== 'pending' 
+            ? `https://solscan.io/tx/${alloc.txHash}?cluster=devnet`
+            : null;
+          const verified = alloc.verified ? '✅' : '';
+          
+          html += `
+            <div style="padding: 1rem; background: var(--bg); border-radius: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <span style="font-weight: 600; color: var(--orange);">${alloc.amount} ${alloc.currency} → ${alloc.recipientName} ${verified}</span>
+                <span style="font-size: 0.75rem; color: var(--muted);">${time}</span>
+              </div>
+              <div style="font-size: 0.875rem; color: var(--muted); margin-bottom: 0.5rem;">${alloc.purpose}</div>
+              ${explorerUrl ? `<a href="${explorerUrl}" target="_blank" style="font-size: 0.75rem;">TX: ${shortTx} →</a>` : `<span style="font-size: 0.75rem; color: var(--muted);">TX: ${shortTx}</span>`}
+            </div>
+          `;
+        }
+        html += '</div>';
+        
+        allocationsList.innerHTML = html;
+        allocationsIndicator.textContent = '(live)';
+        allocationsIndicator.className = '';
+        
+      } catch (e) {
+        allocationsList.innerHTML = `<p class="error">Failed to load: ${e.message}</p>`;
+        allocationsIndicator.textContent = '(error)';
+        allocationsIndicator.className = 'error';
+        console.error('Allocations error:', e);
+      }
+    }
+
     // Load data on page load
     loadBalance();
     loadVotingDashboard();
+    loadAllocations();
 
     // Refresh every 30 seconds
     setInterval(() => {
       loadBalance();
       loadVotingDashboard();
+      loadAllocations();
     }, 30000);
   </script>
 </body>
