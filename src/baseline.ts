@@ -38,6 +38,16 @@ export interface VerifiedVote {
 let sessions: Map<string, BaselineSession> = loadSessions() as Map<string, BaselineSession>;
 let votes: Map<string, VerifiedVote[]> = loadVotes() as Map<string, VerifiedVote[]>;
 
+// Track attempts per agent (max 2)
+const MAX_ATTEMPTS = 2;
+let agentAttempts: Map<string, number> = new Map();
+
+// Initialize attempt counts from existing sessions
+for (const session of sessions.values()) {
+  const current = agentAttempts.get(session.agentId) || 0;
+  agentAttempts.set(session.agentId, current + 1);
+}
+
 console.log(`Loaded ${sessions.size} sessions and ${votes.size} agent votes from disk`);
 
 /**
@@ -46,7 +56,20 @@ console.log(`Loaded ${sessions.size} sessions and ${votes.size} agent votes from
 export function startBaseline(agentId: string, projects: string[]): {
   sessionId: string;
   question: string;
-} {
+} | { error: string; attemptsUsed: number; maxAttempts: number } {
+  // Check attempt limit
+  const attempts = agentAttempts.get(agentId) || 0;
+  if (attempts >= MAX_ATTEMPTS) {
+    return {
+      error: `Maximum attempts (${MAX_ATTEMPTS}) reached for agent "${agentId}". No more retries allowed.`,
+      attemptsUsed: attempts,
+      maxAttempts: MAX_ATTEMPTS
+    };
+  }
+  
+  // Increment attempt counter
+  agentAttempts.set(agentId, attempts + 1);
+  
   const sessionId = `baseline_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const questions = generateQuestions(projects);
   

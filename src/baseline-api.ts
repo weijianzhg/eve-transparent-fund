@@ -43,6 +43,12 @@ app.post('/api/baseline/start', verifyToken, (req, res) => {
     }
     
     const result = startBaseline(agentId, projects);
+    
+    // Check if error (max attempts reached)
+    if ('error' in result) {
+      return res.status(429).json(result);
+    }
+    
     res.json(result);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
