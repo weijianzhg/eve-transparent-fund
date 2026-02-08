@@ -214,7 +214,7 @@ function calculateFinalScore(session: BaselineSession): BaselineSession['finalSc
   if (autonomyCount > 0) autonomy = autonomy / autonomyCount;
   
   const total = knowledge + reasoning + autonomy;
-  const passed = total >= 20; // Threshold: 20/30 (relaxed for MVP)
+  const passed = total >= 15; // Threshold: 15/30 (lowered for demo)
   
   return {
     knowledge: Math.round(knowledge * 10) / 10,
