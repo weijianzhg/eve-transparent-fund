@@ -5,6 +5,7 @@
  */
 
 import { generateQuestions, evaluateAnswer, BASELINE_QUESTIONS } from './baseline-questions';
+import { saveSessions, loadSessions, saveVotes, loadVotes } from './persistence';
 
 export interface BaselineSession {
   id: string;
@@ -33,9 +34,11 @@ export interface VerifiedVote {
   timestamp: Date;
 }
 
-// In-memory storage (MVP - replace with DB later)
-const sessions = new Map<string, BaselineSession>();
-const votes = new Map<string, VerifiedVote[]>(); // agentId -> votes
+// Persistent storage - load on startup, save on changes
+let sessions: Map<string, BaselineSession> = loadSessions() as Map<string, BaselineSession>;
+let votes: Map<string, VerifiedVote[]> = loadVotes() as Map<string, VerifiedVote[]>;
+
+console.log(`Loaded ${sessions.size} sessions and ${votes.size} agent votes from disk`);
 
 /**
  * Start a new baseline test session
@@ -59,6 +62,7 @@ export function startBaseline(agentId: string, projects: string[]): {
   };
   
   sessions.set(sessionId, session);
+  saveSessions(sessions);
   
   return {
     sessionId,
@@ -100,6 +104,7 @@ export function answerBaseline(
   
   // Move to next question
   session.currentQuestionIndex++;
+  saveSessions(sessions);
   
   // Check if done
   if (session.currentQuestionIndex >= session.questions.length) {
@@ -155,6 +160,7 @@ export function completeBaseline(
     }
     
     votes.set(session.agentId, agentVotes);
+    saveVotes(votes);
     
     return {
       passed: true,
@@ -276,4 +282,6 @@ export function getSession(sessionId: string): BaselineSession | undefined {
 export function resetBaseline(): void {
   sessions.clear();
   votes.clear();
+  saveSessions(sessions);
+  saveVotes(votes);
 }

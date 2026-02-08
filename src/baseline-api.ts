@@ -15,6 +15,7 @@ import {
   getSession
 } from './baseline';
 import { verifyToken } from './auth-middleware';
+import { calculateAllocations } from './allocator';
 
 interface AuthRequest extends Request {
   agentId?: string;
@@ -138,6 +139,44 @@ app.get('/api/baseline/sessions/:sessionId', (req, res) => {
  */
 app.get('/api/baseline/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+/**
+ * GET /api/dashboard
+ * Dashboard data: top projects, allocations, stats
+ */
+app.get('/api/dashboard', (req, res) => {
+  try {
+    const results = getVoteResults();
+    const sessions = getAllSessions();
+    
+    // Calculate allocations for top 3
+    const poolAmount = 0.3; // SOL to allocate
+    const allocations = calculateAllocations(results, poolAmount, { topN: 3 });
+    
+    // Stats
+    const completedSessions = sessions.filter(s => s.completed);
+    const passedSessions = completedSessions.filter(s => s.finalScore?.passed);
+    
+    res.json({
+      topProjects: results.slice(0, 10),
+      allocations,
+      stats: {
+        totalSessions: sessions.length,
+        completedSessions: completedSessions.length,
+        passedSessions: passedSessions.length,
+        passRate: completedSessions.length > 0 
+          ? Math.round((passedSessions.length / completedSessions.length) * 100) 
+          : 0,
+        totalVotes: results.reduce((sum, r) => sum + r.voteCount, 0),
+        uniqueProjects: results.length,
+        poolAmount
+      },
+      lastUpdated: new Date().toISOString()
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 const PORT = process.env.PORT || 3001;
