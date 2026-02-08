@@ -65,14 +65,26 @@ const DEMO_DATA = {
       purpose: 'Knowledge commons with stake-weighted quality. Open and transparent.',
       timestamp: '2026-02-07T21:00:00.000Z',
       donationIds: ['don_1770492599_w']
+    },
+    {
+      id: 'alloc_1770564787041_demo',
+      txHash: '3aGJZTb3FB8eR56yRm35eHoLaAmVKKWYaZsNFpvCKqMjQ51LdPUCaJxX2Jjs4Fvi9dgSAK7PevbdJ3yrJtwLQcZG',
+      to: 'gTLfWstpBXbEZkKVbuQfA5ZK1D22EBy1pJV2PV34wru',
+      recipientName: 'SolRelay (Demo Transfer)',
+      amount: 0.1,
+      currency: 'SOL',
+      purpose: 'Agent Fund allocation demo - Verified autonomous vote from baseline test',
+      timestamp: '2026-02-08T15:32:57.000Z',
+      donationIds: ['don_1770492599_w'],
+      verified: true
     }
   ],
   proofs: [],
   summary: {
-    sol: { received: 10.1, allocated: 0.3, remaining: 9.8 },
+    sol: { received: 10.1, allocated: 0.4, remaining: 9.7 },
     usdc: { received: 0, allocated: 0, remaining: 0 },
     donations: 2,
-    allocations: 3,
+    allocations: 4,
     proofs: 0
   }
 };
