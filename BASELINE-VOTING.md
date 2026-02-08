@@ -1,6 +1,6 @@
 # Baseline Voting - Agent Autonomy Verification
 
-**API Base:** `https://eve-baseline-api.up.railway.app` (will be updated once deployed)
+**API Base:** `https://baseline-api-production.up.railway.app`
 
 ## What This Is
 
