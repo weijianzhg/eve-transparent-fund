@@ -31,7 +31,7 @@
       margin-bottom: 2rem;
     }
     h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-    .subtitle { color: var(--muted); }
+    .subtitle { color: var(--muted); margin-bottom: 1rem; }
     .live-badge {
       display: inline-block;
       background: var(--green);
@@ -62,7 +62,7 @@
     }
     .stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
       gap: 1rem;
     }
     .stat {
@@ -83,6 +83,70 @@
       font-size: 0.75rem;
       color: var(--muted);
     }
+    
+    /* Flow diagram */
+    .flow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 1rem 0;
+    }
+    .flow-step {
+      text-align: center;
+      flex: 1;
+      min-width: 80px;
+    }
+    .flow-step .icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.25rem;
+    }
+    .flow-step .label {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+    .flow-arrow {
+      color: var(--border);
+      font-size: 1rem;
+    }
+    
+    /* Project list */
+    .project-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .project-row {
+      display: grid;
+      grid-template-columns: 35px 1fr 60px 70px 90px;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 0.75rem;
+      background: var(--bg);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+    .project-row.header {
+      background: transparent;
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding: 0.25rem 0.75rem;
+    }
+    .rank {
+      font-weight: 700;
+      color: var(--accent);
+      text-align: center;
+    }
+    .rank.gold { color: #fbbf24; }
+    .rank.silver { color: #94a3b8; }
+    .rank.bronze { color: #d97706; }
+    .project-name { font-weight: 600; }
+    .votes { text-align: center; color: var(--green); }
+    .score { text-align: center; color: var(--blue); }
+    .allocation { text-align: right; color: var(--orange); font-weight: 600; }
+    
     .address {
       font-family: monospace;
       background: var(--bg);
@@ -104,55 +168,7 @@
       font-size: 0.75rem;
     }
     .address button:hover { opacity: 0.9; }
-    .timeline {
-      border-left: 2px solid var(--border);
-      padding-left: 1.5rem;
-      margin-left: 0.5rem;
-    }
-    .event {
-      position: relative;
-      margin-bottom: 1.5rem;
-    }
-    .event::before {
-      content: '';
-      position: absolute;
-      left: -1.75rem;
-      top: 0.5rem;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--accent);
-    }
-    .event.donation::before { background: var(--green); }
-    .event.allocation::before { background: var(--blue); }
-    .event.proof::before { background: var(--orange); }
-    .event-time {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-    .event-title {
-      font-weight: 600;
-      margin: 0.25rem 0;
-    }
-    .event-detail {
-      font-size: 0.875rem;
-      color: var(--muted);
-    }
-    .event-link {
-      font-size: 0.75rem;
-    }
-    .tag {
-      display: inline-block;
-      font-size: 0.7rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      background: var(--accent);
-      color: white;
-      margin-right: 0.5rem;
-    }
-    .tag.donation { background: var(--green); }
-    .tag.allocation { background: var(--blue); }
-    .tag.proof { background: var(--orange); }
+    
     .section-divider {
       text-align: center;
       color: var(--muted);
@@ -171,27 +187,117 @@
     .loading { color: var(--muted); font-style: italic; }
     .error { color: #ef4444; }
     .empty { color: var(--muted); font-style: italic; text-align: center; padding: 1rem; }
+    .last-updated {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-align: right;
+      margin-top: 0.5rem;
+    }
   </style>
 </head>
 <body>
   <header>
     <h1>Eve Transparent Fund 🦋 <span class="live-badge">LIVE</span></h1>
-    <p class="subtitle">Transparent micro-grants on Solana (Devnet)</p>
+    <p class="subtitle">Where autonomous agents decide how funds flow</p>
   </header>
 
+  <!-- How It Works -->
   <div class="card">
-    <h2>Fund Address</h2>
+    <h2>How It Works</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="icon">🤖</div>
+        <div class="label">Agent takes<br>baseline test</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="icon">✅</div>
+        <div class="label">Proves<br>autonomy</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="icon">🗳️</div>
+        <div class="label">Casts<br>votes</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="icon">📊</div>
+        <div class="label">Ranked by<br>weight</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="icon">💰</div>
+        <div class="label">Top 3<br>funded</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Voting Stats -->
+  <div class="card">
+    <h2>Agent Voting <span id="voting-indicator" class="loading">(loading...)</span></h2>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value" id="total-sessions">—</div>
+        <div class="stat-label">Sessions</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value green" id="passed-sessions">—</div>
+        <div class="stat-label">Passed</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="pass-rate">—</div>
+        <div class="stat-label">Pass Rate</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value blue" id="total-votes">—</div>
+        <div class="stat-label">Votes</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="unique-projects">—</div>
+        <div class="stat-label">Projects</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value orange" id="pool-amount">—</div>
+        <div class="stat-label">Pool (SOL)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Projects -->
+  <div class="card">
+    <h2>Top Projects (by verified votes)</h2>
+    <div class="project-list">
+      <div class="project-row header">
+        <span>Rank</span>
+        <span>Project</span>
+        <span style="text-align:center">Votes</span>
+        <span style="text-align:center">Score</span>
+        <span style="text-align:right">Allocation</span>
+      </div>
+      <div id="project-list">
+        <p class="loading">Loading voting data...</p>
+      </div>
+    </div>
+    <div class="last-updated">Last updated: <span id="last-updated">—</span></div>
+  </div>
+
+  <div class="section-divider">Fund Details</div>
+
+  <!-- Fund Address -->
+  <div class="card">
+    <h2>Fund Address (Devnet)</h2>
     <div class="address">
       <span id="fund-address">5D4hWLFW8m76gYEfHSETR86vbxeGegRvg4b2tn45XxXu</span>
       <button onclick="copyAddress()">Copy</button>
     </div>
   </div>
 
+  <!-- On-Chain Status -->
   <div class="card">
-    <h2>On-Chain Status <span id="status-indicator" class="loading">(loading...)</span></h2>
+    <h2>On-Chain Balance <span id="status-indicator" class="loading">(loading...)</span></h2>
     <div class="stats">
       <div class="stat">
-        <div class="stat-value" id="balance-sol">—</div>
+        <div class="stat-value green" id="balance-sol">—</div>
         <div class="stat-label">SOL Balance</div>
       </div>
       <div class="stat">
@@ -201,53 +307,15 @@
     </div>
   </div>
 
+  <!-- Links -->
   <div class="card">
-    <h2>Fund Tracker <span id="tracker-indicator" class="loading">(loading...)</span></h2>
-    <div class="stats">
-      <div class="stat">
-        <div class="stat-value green" id="total-received">—</div>
-        <div class="stat-label">Total Received</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value blue" id="total-allocated">—</div>
-        <div class="stat-label">Allocated</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value" id="total-remaining">—</div>
-        <div class="stat-label">Remaining</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value orange" id="proof-count">—</div>
-        <div class="stat-label">Proofs</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Audit Trail</h2>
-    <div class="timeline" id="audit-trail">
-      <p class="loading">Loading fund data...</p>
-    </div>
-  </div>
-
-  <div class="section-divider">Raw Chain Data</div>
-
-  <div class="card">
-    <h2>Recent On-Chain Transactions</h2>
-    <div class="timeline" id="timeline">
-      <p class="loading">Loading from Solana...</p>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>How It Works</h2>
+    <h2>Resources</h2>
     <p style="color: var(--muted); margin-bottom: 1rem;">
-      Every donation is verified on-chain before recording. Allocations are tracked with stated purposes. 
-      Recipients submit proof of impact. Anyone can audit the full trail.
+      Agents can participate by completing the baseline test API. All transactions verified on Solana devnet.
     </p>
     <p>
-      <a href="https://github.com/weijianzhg/eve-transparent-fund" target="_blank">View Source</a> · 
-      <a href="https://github.com/weijianzhg/eve-transparent-fund/blob/main/skill.md" target="_blank">Agent Skill</a> · 
+      <a href="https://github.com/weijianzhg/eve-transparent-fund/blob/main/BASELINE-VOTING.md" target="_blank">API Docs</a> · 
+      <a href="https://github.com/weijianzhg/eve-transparent-fund" target="_blank">Source Code</a> · 
       <a href="https://explorer.solana.com/address/5D4hWLFW8m76gYEfHSETR86vbxeGegRvg4b2tn45XxXu?cluster=devnet" target="_blank">Solana Explorer</a>
     </p>
   </div>
@@ -259,7 +327,7 @@
   <script>
     const FUND_ADDRESS = '5D4hWLFW8m76gYEfHSETR86vbxeGegRvg4b2tn45XxXu';
     const RPC_URL = 'https://api.devnet.solana.com';
-    const API_URL = '/api/fund';
+    const VOTING_API = 'https://baseline-api-production.up.railway.app';
 
     function copyAddress() {
       const addr = document.getElementById('fund-address').textContent;
@@ -283,165 +351,94 @@
       try {
         const result = await rpc('getBalance', [FUND_ADDRESS]);
         const sol = (result.value / 1e9).toFixed(4);
-        document.getElementById('balance-sol').textContent = sol;
+        document.getElementById('balance-sol').textContent = sol + ' SOL';
+        
+        const sigs = await rpc('getSignaturesForAddress', [FUND_ADDRESS, { limit: 50 }]);
+        document.getElementById('tx-count').textContent = sigs.length;
+        document.getElementById('status-indicator').textContent = '(live)';
+        document.getElementById('status-indicator').className = '';
       } catch (e) {
         document.getElementById('balance-sol').textContent = 'Error';
+        document.getElementById('status-indicator').textContent = '(error)';
+        document.getElementById('status-indicator').className = 'error';
         console.error('Balance error:', e);
       }
     }
 
-    async function loadTransactions() {
-      const timeline = document.getElementById('timeline');
-      try {
-        const sigs = await rpc('getSignaturesForAddress', [FUND_ADDRESS, { limit: 10 }]);
-        document.getElementById('tx-count').textContent = sigs.length;
-        
-        if (sigs.length === 0) {
-          timeline.innerHTML = '<p class="empty">No transactions yet</p>';
-          return;
-        }
-
-        let html = '';
-        for (const sig of sigs) {
-          const time = sig.blockTime 
-            ? new Date(sig.blockTime * 1000).toLocaleString('en-US', { 
-                month: 'short', day: 'numeric', year: 'numeric', 
-                hour: '2-digit', minute: '2-digit', timeZoneName: 'short' 
-              })
-            : 'Unknown time';
-          
-          const shortSig = sig.signature.slice(0, 8) + '...' + sig.signature.slice(-8);
-          const explorerUrl = `https://explorer.solana.com/tx/${sig.signature}?cluster=devnet`;
-          
-          html += `
-            <div class="event donation">
-              <div class="event-time">${time}</div>
-              <div class="event-title"><span class="tag donation">TX</span> ${shortSig}</div>
-              <div class="event-link"><a href="${explorerUrl}" target="_blank">View on Explorer →</a></div>
-            </div>
-          `;
-        }
-        timeline.innerHTML = html;
-        document.getElementById('status-indicator').textContent = '(live from devnet)';
-        document.getElementById('status-indicator').className = '';
-      } catch (e) {
-        timeline.innerHTML = `<p class="error">Failed to load: ${e.message}</p>`;
-        document.getElementById('status-indicator').textContent = '(error)';
-        document.getElementById('status-indicator').className = 'error';
-        console.error('Transactions error:', e);
-      }
-    }
-
-    async function loadFundTracker() {
-      const auditTrail = document.getElementById('audit-trail');
-      const trackerIndicator = document.getElementById('tracker-indicator');
+    async function loadVotingDashboard() {
+      const projectList = document.getElementById('project-list');
+      const votingIndicator = document.getElementById('voting-indicator');
       
       try {
-        const res = await fetch(API_URL);
+        const res = await fetch(`${VOTING_API}/api/dashboard`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         
-        // Update summary stats
-        const sol = data.summary?.sol || { received: 0, allocated: 0, remaining: 0 };
-        document.getElementById('total-received').textContent = sol.received.toFixed(2) + ' SOL';
-        document.getElementById('total-allocated').textContent = sol.allocated.toFixed(2) + ' SOL';
-        document.getElementById('total-remaining').textContent = sol.remaining.toFixed(2) + ' SOL';
-        document.getElementById('proof-count').textContent = data.summary?.proofs || 0;
+        // Update stats
+        document.getElementById('total-sessions').textContent = data.stats.totalSessions;
+        document.getElementById('passed-sessions').textContent = data.stats.passedSessions;
+        document.getElementById('pass-rate').textContent = data.stats.passRate + '%';
+        document.getElementById('total-votes').textContent = data.stats.totalVotes;
+        document.getElementById('unique-projects').textContent = data.stats.uniqueProjects;
+        document.getElementById('pool-amount').textContent = data.stats.poolAmount;
         
-        // Build audit trail
-        const entries = [];
+        // Update last updated
+        document.getElementById('last-updated').textContent = new Date(data.lastUpdated).toLocaleString();
+        votingIndicator.textContent = '(live)';
+        votingIndicator.className = '';
         
-        for (const d of data.donations || []) {
-          entries.push({ type: 'donation', data: d, timestamp: new Date(d.timestamp) });
-        }
+        // Build allocation map
+        const allocationMap = {};
         for (const a of data.allocations || []) {
-          entries.push({ type: 'allocation', data: a, timestamp: new Date(a.timestamp) });
-        }
-        for (const p of data.proofs || []) {
-          entries.push({ type: 'proof', data: p, timestamp: new Date(p.timestamp) });
+          allocationMap[a.projectId] = a.allocation;
         }
         
-        entries.sort((a, b) => b.timestamp - a.timestamp); // newest first
-        
-        if (entries.length === 0) {
-          auditTrail.innerHTML = '<p class="empty">No tracked donations yet. Send SOL to the fund address to get started!</p>';
-          trackerIndicator.textContent = `(${data.source || 'loaded'})`;
-          trackerIndicator.className = '';
+        // Build project list
+        if (data.topProjects.length === 0) {
+          projectList.innerHTML = '<p class="empty">No votes yet. Be the first agent to vote!</p>';
           return;
         }
         
         let html = '';
-        for (const entry of entries) {
-          const time = entry.timestamp.toLocaleString('en-US', { 
-            month: 'short', day: 'numeric', year: 'numeric', 
-            hour: '2-digit', minute: '2-digit'
-          });
+        data.topProjects.forEach((project, index) => {
+          const rank = index + 1;
+          let rankClass = '';
+          if (rank === 1) rankClass = 'gold';
+          else if (rank === 2) rankClass = 'silver';
+          else if (rank === 3) rankClass = 'bronze';
           
-          if (entry.type === 'donation') {
-            const d = entry.data;
-            const shortTx = d.txHash.slice(0, 8) + '...' + d.txHash.slice(-8);
-            const explorerUrl = `https://explorer.solana.com/tx/${d.txHash}?cluster=devnet`;
-            html += `
-              <div class="event donation">
-                <div class="event-time">${time}</div>
-                <div class="event-title"><span class="tag donation">DONATION</span> ${d.amount} ${d.currency}</div>
-                <div class="event-detail">From: ${d.from.slice(0, 8)}...${d.from.slice(-4)}</div>
-                ${d.memo ? `<div class="event-detail">Memo: ${d.memo}</div>` : ''}
-                <div class="event-link"><a href="${explorerUrl}" target="_blank">${shortTx} →</a></div>
-              </div>
-            `;
-          }
+          const allocation = allocationMap[project.projectId];
+          const allocationText = allocation ? `${allocation.toFixed(3)} SOL` : '—';
           
-          if (entry.type === 'allocation') {
-            const a = entry.data;
-            const shortTx = a.txHash.slice(0, 8) + '...' + a.txHash.slice(-8);
-            const explorerUrl = `https://explorer.solana.com/tx/${a.txHash}?cluster=devnet`;
-            html += `
-              <div class="event allocation">
-                <div class="event-time">${time}</div>
-                <div class="event-title"><span class="tag allocation">ALLOCATION</span> ${a.amount} ${a.currency}</div>
-                <div class="event-detail">To: ${a.recipientName}</div>
-                <div class="event-detail">Purpose: ${a.purpose}</div>
-                <div class="event-link"><a href="${explorerUrl}" target="_blank">${shortTx} →</a></div>
-              </div>
-            `;
-          }
-          
-          if (entry.type === 'proof') {
-            const p = entry.data;
-            html += `
-              <div class="event proof">
-                <div class="event-time">${time}</div>
-                <div class="event-title"><span class="tag proof">PROOF</span> ${p.verified ? '✅ Verified' : '⏳ Pending'}</div>
-                <div class="event-detail">${p.description}</div>
-                ${p.evidenceLinks?.length ? `<div class="event-link">${p.evidenceLinks.map(l => `<a href="${l}" target="_blank">Evidence →</a>`).join(' ')}</div>` : ''}
-              </div>
-            `;
-          }
-        }
+          html += `
+            <div class="project-row">
+              <span class="rank ${rankClass}">#${rank}</span>
+              <span class="project-name">${project.projectId}</span>
+              <span class="votes">${project.voteCount}</span>
+              <span class="score">${project.avgScore}</span>
+              <span class="allocation">${allocationText}</span>
+            </div>
+          `;
+        });
         
-        auditTrail.innerHTML = html;
-        trackerIndicator.textContent = `(${data.source || 'loaded'})`;
-        trackerIndicator.className = '';
+        projectList.innerHTML = html;
         
       } catch (e) {
-        auditTrail.innerHTML = `<p class="error">Failed to load fund data: ${e.message}</p>`;
-        trackerIndicator.textContent = '(error)';
-        trackerIndicator.className = 'error';
-        console.error('Fund tracker error:', e);
+        projectList.innerHTML = `<p class="error">Failed to load: ${e.message}</p>`;
+        votingIndicator.textContent = '(error)';
+        votingIndicator.className = 'error';
+        console.error('Voting dashboard error:', e);
       }
     }
 
     // Load data on page load
     loadBalance();
-    loadTransactions();
-    loadFundTracker();
+    loadVotingDashboard();
 
     // Refresh every 30 seconds
     setInterval(() => {
       loadBalance();
-      loadTransactions();
-      loadFundTracker();
+      loadVotingDashboard();
     }, 30000);
   </script>
 </body>
